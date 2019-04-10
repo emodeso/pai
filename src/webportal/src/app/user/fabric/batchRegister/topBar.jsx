@@ -23,7 +23,7 @@ import {CommandBar} from 'office-ui-fabric-react/lib/CommandBar';
 import Context from './context';
 
 function TopBar() {
-  const {importFromCSV, downloadTemplate} = useContext(Context);
+  const {importFromCSV, downloadTemplate, addNew} = useContext(Context);
 
   const buttonPrimaryStyles = {margin: '0 1rem 0 -1rem'};
   const buttonDefaultStyles = {margin: '0 1rem', backgroundColor: '#DADADA'};
@@ -60,37 +60,23 @@ function TopBar() {
     };
   }
 
-  // /**
-  //  * @returns {import('office-ui-fabric-react').ICommandBarItemProps}
-  //  */
-  // function getNew() {
-  //   return {
-  //     key: 'new',
-  //     name: 'New',
-  //     buttonStyles: {root: {backgroundColor: 'transparent', height: '100%'}},
-  //     iconProps: {
-  //       iconName: 'Add',
-  //     },
-  //     href: '/submit.html',
-  //   };
-  // }
+  /**
+   * @returns {import('office-ui-fabric-react').ICommandBarItemProps}
+   */
+  function getAddNew() {
+    return {
+      key: 'addNew',
+      name: 'Add New',
+      iconProps: {
+        iconName: 'Add',
+      },
+      buttonStyles: {root: buttonDefaultStyles},
+      commandBarButtonAs: DefaultButton,
+      onClick: addNew,
+    };
+  }
 
-  // /**
-  //  * @returns {import('office-ui-fabric-react').ICommandBarItemProps}
-  //  */
-  // function getRefresh() {
-  //   return {
-  //     key: 'refresh',
-  //     name: 'Refresh',
-  //     buttonStyles: {root: {backgroundColor: 'transparent', height: '100%'}},
-  //     iconProps: {
-  //       iconName: 'Refresh',
-  //     },
-  //     onClick: refreshJobs,
-  //   };
-  // }
-
-  const topBarItems = [getBrowse(), getDownloadTemplate()];
+  const topBarItems = [getBrowse(), getAddNew(), getDownloadTemplate()];
 
   return (
     <React.Fragment>

@@ -50,7 +50,7 @@ export const downloadTemplate = () => {
   }
 };
 
-const toBool = (val) => {
+export const toBool = (val) => {
   return (String(val)).toLowerCase() === 'true';
 };
 

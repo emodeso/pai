@@ -15,7 +15,39 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import React from 'react';
+import React, {useContext} from 'react';
 
-export default React.createContext({
-});
+import {PrimaryButton} from 'office-ui-fabric-react/lib/Button';
+import {CommandBar} from 'office-ui-fabric-react/lib/CommandBar';
+
+import Context from './context';
+
+function BottomBar() {
+  const {submit} = useContext(Context);
+
+  const buttonPrimaryStyles = {margin: '1rem'};
+
+  /**
+   * @returns {import('office-ui-fabric-react').ICommandBarItemProps}
+   */
+  function getSubmit() {
+    return {
+      key: 'submit',
+      name: 'Submit',
+      buttonStyles: {root: buttonPrimaryStyles},
+      commandBarButtonAs: PrimaryButton,
+      onClick: submit,
+    };
+  }
+
+  return (
+    <React.Fragment>
+      <CommandBar
+        farItems={[getSubmit()]}
+        styles={{root: {backgroundColor: 'transparent'}}}
+      />
+    </React.Fragment>
+  );
+}
+
+export default BottomBar;

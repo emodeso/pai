@@ -15,27 +15,18 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-// import * as querystring from 'querystring';
-
-import React, {useState, useMemo, useCallback, useEffect, useRef} from 'react';
-// import {debounce} from 'lodash';
+import React, {useState} from 'react';
 
 import {initializeIcons} from 'office-ui-fabric-react/lib/Icons';
 import {Fabric} from 'office-ui-fabric-react/lib/Fabric';
-// import {MessageBar, MessageBarType} from 'office-ui-fabric-react/lib/MessageBar';
-// import {Overlay} from 'office-ui-fabric-react/lib/Overlay';
 import {Stack} from 'office-ui-fabric-react/lib/Stack';
 
-// import Context from './Context';
-// import Filter from './Filter';
-// import Ordering from './Ordering';
-// import Pagination from './Pagination';
-// import Paginator from './Paginator';
-// import Table from './Table';
-// import TopBar from './TopBar';
 import Context from './context';
 import BackButton from '../components/back';
 import TopBar from './topBar';
+import Table from './table';
+import BottomBar from './bottomBar';
+import {toBool} from './utils';
 
 import webportalConfig from '../../../config/webportal.config';
 import userAuth from '../../user-auth/user-auth.component';
@@ -50,102 +41,9 @@ const columnGithubPAT = 'githubPAT';
 
 initializeIcons();
 
-// function getError(error) {
-//   return (
-//     <Overlay>
-//       <MessageBar messageBarType={MessageBarType.blocked}>
-//         {error}
-//       </MessageBar>
-//     </Overlay>
-//   );
-// }
-
 export default function BatchRegister() {
-  // const admin = userAuth.checkAdmin();
-  // const username = cookies.get('user');
-
-  const [userInfos, setUserInfos] = useState(null);
-  // const [selectedJobs, setSelectedJobs] = useState([]);
-  // const [error, setError] = useState(null);
-
-  // const initialFilter = useMemo(() => {
-  //   const initialFilterUsers = (username && !admin) ? new Set([username]) : undefined;
-  //   const filter = new Filter(undefined, initialFilterUsers);
-  //   filter.load();
-  //   return filter;
-  // });
-  // const [filter, setFilter] = useState(initialFilter);
-  // const [ordering, setOrdering] = useState(new Ordering());
-  // const [pagination, setPagination] = useState(new Pagination());
-  // const [filteredJobs, setFilteredJobs] = useState(null);
-
-  // useEffect(() => filter.save(), [filter]);
-
-  // const {current: applyFilter} = useRef(debounce((allJobs, /** @type {Filter} */filter) => {
-  //   setFilteredJobs(filter.apply(allJobs || []));
-  // }, 200));
-
-  // useEffect(() => {
-  //   applyFilter(allJobs, filter);
-  // }, [applyFilter, allJobs, filter]);
-
-  // useEffect(() => {
-  //   setPagination(new Pagination(pagination.itemsPerPage, 0));
-  // }, [filteredJobs]);
-
-  // const stopJob = useCallback((...jobs) => {
-  //   userAuth.checkToken((token) => {
-  //     jobs.forEach((job) => {
-  //       const {name, username} = job;
-  //       fetch(`${webportalConfig.restServerUri}/api/v1/user/${username}/jobs/${name}/executionType`, {
-  //         method: 'PUT',
-  //         headers: {
-  //           'Authorization': `Bearer ${token}`,
-  //           'Content-Type': 'application/json',
-  //         },
-  //         body: JSON.stringify({value: 'STOP'}),
-  //       }).then((response) => {
-  //         if (response.ok) {
-  //           job.executionType = 'STOPPING';
-  //           delete job._statusText;
-  //           delete job._statusIndex;
-  //           setAllJobs(allJobs.slice());
-  //         } else {
-  //           return response.json().then((data) => {
-  //             throw Error(data.message);
-  //           });
-  //         }
-  //       }).catch((reason) => {
-  //         setError(reason.message);
-  //         setTimeout(setError, 1000, null);
-  //       });
-  //     });
-  //   });
-  // }, [allJobs]);
-
-  // const refreshJobs = useCallback(function refreshJobs() {
-  //   setAllJobs(null);
-  //   const query = querystring.parse(location.search.replace(/^\?/, ''));
-  //   if (query['vcName']) {
-  //     const {keyword, users, virtualClusters, statuses} = filter;
-  //     setFilter(new Filter(keyword, users, virtualClusters.add(query['vcName']), statuses));
-  //   }
-  //   fetch(`${webportalConfig.restServerUri}/api/v1/jobs`)
-  //     .then((response) => {
-  //       if (!response.ok) {
-  //         throw Error(response.message);
-  //       } else {
-  //         return response.json();
-  //       }
-  //     })
-  //     .then(setAllJobs)
-  //     .catch((reason) => {
-  //       setError(reason.message);
-  //       setTimeout(setError, 1000, null);
-  //     });
-  // }, []);
-
-  // useEffect(refreshJobs, []);
+  // const [userInfos, setUserInfos] = useState([]);
+  const [userInfos, setUserInfos] = useState([{'username': 'lchao1', 'password': '111111', 'admin': 'FALSE', 'virtual cluster': 'default', 'githubPAT': ''}, {'username': 'lchao2', 'password': '111111', 'admin': 'false', 'virtual cluster': '', 'githubPAT': ''}, {'username': 'lchao3', 'password': '111111', 'admin': 'fAlse', 'virtual cluster': '', 'githubPAT': ''}]);
 
   const downloadTemplate = () => {
     let csvString = csvParser.unparse([{
@@ -228,30 +126,119 @@ export default function BatchRegister() {
     fileInput.click();
   };
 
+  const addNew = () => {
+    alert('addNew');
+  };
+
+  const addUser = (username, password, admin, vc, githubPAT) => {
+    let deferredObject = new $.Deferred();
+    userAuth.checkToken((token) => {
+      $.ajax({
+        url: `${webportalConfig.restServerUri}/api/v1/user`,
+        data: {
+          username,
+          password,
+          admin: toBool(admin),
+          modify: false,
+        },
+        type: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        dataType: 'json',
+        success: () => {
+          let reqs = [];
+          if (githubPAT) {
+            let req = $.ajax({
+              url: `${webportalConfig.restServerUri}/api/v1/user/${username}/githubPAT`,
+              data: {
+                githubPAT: githubPAT,
+              },
+              type: 'PUT',
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+              dataType: 'json',
+            });
+            reqs.push(req);
+          }
+          // Admin user VC update will be executed in rest-server
+          if (!toBool(admin) && vc) {
+            let req = $.ajax({
+              url: `${webportalConfig.restServerUri}/api/v1/user/${username}/virtualClusters`,
+              data: {
+                virtualClusters: vc,
+              },
+              type: 'PUT',
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+              dataType: 'json',
+            });
+            reqs.push(req);
+          }
+          $.when(...reqs).then(
+            () => {
+              deferredObject.resolve({
+                isSuccess: true,
+                message: `User ${username} created successfully`,
+              });
+            },
+            (xhr) => {
+              const res = JSON.parse(xhr.responseText);
+              deferredObject.resolve({
+                isSuccess: true,
+                message: `User ${username} created successfully but failed when update other info: ${res.message}`,
+              });
+            }
+          );
+        },
+        error: (xhr, textStatus, error) => {
+          const res = JSON.parse(xhr.responseText);
+          deferredObject.resolve({
+            isSuccess: false,
+            message: `User ${username} created failed: ${res.message}`,
+          });
+        },
+      });
+    });
+    return deferredObject.promise();
+  };
+
+  const addUserRecursively = (index) => {
+    if (index == 0) {
+      // loading.showLoading();
+    }
+    if (index >= userInfos.length) {
+      // loading.hideLoading();
+      // alert('finished');
+      // setUserInfos(userInfos.slice());
+    } else {
+      let userInfo = userInfos[index];
+      addUser(userInfo[columnUsername],
+        userInfo[columnPassword],
+        userInfo[columnAdmin],
+        userInfo[columnVC],
+        userInfo[columnGithubPAT])
+        .then((result) => {
+          userInfo.status = result;
+          setUserInfos(userInfos.slice());
+          addUserRecursively(++index);
+        });
+    }
+  };
+
+  const submit = () => {
+    addUserRecursively(0);
+  };
+
   const context = {
     downloadTemplate,
     importFromCSV,
+    addNew,
     userInfos,
+    submit,
   };
-
-  // return (
-  //   <Context.Provider value={context}>
-  //     <Fabric style={{height: '100%'}}>
-  //       <Stack verticalFill styles={{root: {position: 'relative', padding: '0 20px 20px'}}}>
-  //         <Stack.Item>
-  //           <TopBar/>
-  //         </Stack.Item>
-  //         <Stack.Item grow styles={{root: {height: 1, overflow: 'auto', backgroundColor: 'white', paddingTop: 15}}}>
-  //           <Table/>
-  //         </Stack.Item>
-  //         <Stack.Item styles={{root: {backgroundColor: 'white', paddingBottom: 15}}}>
-  //           <Paginator/>
-  //         </Stack.Item>
-  //         {error !== null ? getError(error) : null}
-  //       </Stack>
-  //     </Fabric>
-  //   </Context.Provider>
-  // );
 
   return (
     <Context.Provider value={context}>
@@ -264,14 +251,15 @@ export default function BatchRegister() {
             <TopBar />
           </Stack.Item>
           <Stack.Item>
-            <BackButton />
+            <div style={{padding: '1rem', backgroundColor: 'white'}}>
+              <Table />
+            </div>
           </Stack.Item>
           <Stack.Item>
-            <BackButton />
+            {userInfos.length > 0 ? <BottomBar /> : null}
           </Stack.Item>
         </Stack>
       </Fabric>
     </Context.Provider>
-  )
-    ;
+  );
 }
